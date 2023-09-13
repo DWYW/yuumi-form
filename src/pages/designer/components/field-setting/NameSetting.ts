@@ -14,7 +14,7 @@ export default defineComponent({
       return getSelectedField()?.name || ""
     })
     function onChange(e: InputEvent) {
-      updateSelectedFieldPropertyValue("props.placeholder", (<HTMLInputElement>e.target).value)
+      updateSelectedFieldPropertyValue("name", (<HTMLInputElement>e.target).value)
     }
     return { staticText, propertyValue, onChange }
   },
