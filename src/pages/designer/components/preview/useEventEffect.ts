@@ -1,4 +1,6 @@
-import { EventEffectConditionSchema, EventEffectSchema, Property, Match } from "@/pages/designer/useEventEffect"
+import { string2date } from "@/common/moment"
+import type { EventEffectConditionSchema, EventEffectSchema, Property, Match } from "@/pages/designer/share/useEventEffect"
+import type { FieldItem } from "@/pages/designer/share/type"
 
 interface UseEventEffectOption {
   getter: (type: Property) => (uid:string) => any,
@@ -39,9 +41,19 @@ export function useEventEffect({ getter, setter }: UseEventEffectOption) {
     return condition.property ? validateMap[condition.property]() : false
   }
 
-  function effectExec({ fieldId, property, value }: EventEffectSchema): void {
-    if (!property) return
-    setter(property)(fieldId, value)
+  function effectExec({ fieldId, property, value }: EventEffectSchema, field?: FieldItem): void {
+    if (!property || !field) return
+
+    if (property === "value") {
+      const getters: {[x:string]: () => any} = {
+        timepicker: () => string2date(<string>value, field.props.format),
+        datepicker: () => string2date(<string>value, field.props.format)
+      }
+      const _value = getters[field.type] ? getters[field.type]() : value
+      setter(property)(fieldId, _value)
+    } else {
+      setter(property)(fieldId, value)
+    }
   }
 
   return {

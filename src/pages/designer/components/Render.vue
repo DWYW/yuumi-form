@@ -12,14 +12,15 @@
         >
           <span v-t="'MESSAGE.FORM_EMPTY'" />
         </div>
+
         <div
           v-for="field in schema"
           :key="field.uid"
           :class="['field-item', { '_selected': selectedID === field.uid }]"
           :data-id="field.uid"
         >
-          <FieldItemComponent
-            :field-schema="field"
+          <FieldItem
+            :field="field"
           />
 
           <div class="field-item__menus">
@@ -36,12 +37,12 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
-import { useSchema } from "../useSchema"
-import FieldItemComponent from "./FieldItem.vue"
+import { useFields } from "../share/useFields"
+import FieldItem from "./FieldItem.vue"
 import Sortable from "sortablejs"
 import type { SortableEvent } from "sortablejs"
 
-const { generateField, addFieldWithIndex, getFields, deleteField, getSelectedFieldUID, setSelectedFieldUID, updateFieldPosition } = useSchema()
+const { generateField, addField, getFields, deleteField, getSelectedFieldUID, setSelectedFieldUID, updatePosition } = useFields()
 const schema = computed(() => getFields())
 const selectedID = computed(() => getSelectedFieldUID())
 
@@ -78,14 +79,14 @@ function createSortable() {
     ghostClass: "_ghost",
     chosenClass: "_chosen",
     onAdd: ({ item, newIndex }) => {
-      const _schema = generateField(item.dataset.name as string, item.dataset.type as string)
-      addFieldWithIndex(_schema, newIndex)
+      const data = generateField(item.dataset.name as string, item.dataset.type as string)
+      addField(data, newIndex)
       item.parentElement?.removeChild(item)
-      setSelectedFieldUID(_schema.uid)
+      setSelectedFieldUID(data.uid)
     },
     onEnd: ({ newIndex, oldIndex, item }: SortableEvent) => {
       if (newIndex === undefined || oldIndex === undefined || newIndex === oldIndex) return
-      updateFieldPosition(newIndex, oldIndex)
+      updatePosition(newIndex, oldIndex)
 
       // 重置被选中项
       const fieldID = getFieldID(item)

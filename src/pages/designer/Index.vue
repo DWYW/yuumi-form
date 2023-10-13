@@ -1,10 +1,10 @@
 <template>
   <div class="designer">
-    <aside class="designer__left">
-      <WidgetsComponent />
+    <aside class="designer__widgets">
+      <FormWidgets />
     </aside>
 
-    <main class="flex-box--column designer__main">
+    <main class="designer__main flex-box--column">
       <div class="box__header designer__toolbar">
         <YuumiIcon
           icon="line-eye"
@@ -21,71 +21,74 @@
       </div>
 
       <div class="box__content">
-        <FormRenderComponent />
+        <FormRender />
       </div>
     </main>
 
-    <aside class="designer__right setting">
+    <aside class="designer__setting">
       <YuumiTabs v-model="settingType">
         <YuumiTabItem
           :label="$t('TITLE.WIDGET_SETTING')"
           value=""
         >
-          <FieldSettingComponent />
+          <FieldSetting />
         </YuumiTabItem>
 
         <YuumiTabItem
           :label="$t('TITLE.FORM_SETTING')"
           value="formSetting"
         >
-          <FormSettingComponent />
+          <FormSetting />
         </YuumiTabItem>
 
         <YuumiTabItem
           :label="$t('TITLE.EVENT_EFFECT')"
           value="eventEffect"
         >
-          <EventEffectComponent />
+          <EffectSetting />
         </YuumiTabItem>
       </YuumiTabs>
     </aside>
-  </div>
 
-  <div class="mask">
-    <YuumiDialog
-      v-model="isPreviewJSONData"
-      title="JSON Data"
-      @beforeEnter="onShowJSONData"
-      @afterLeave="onHideJSONData"
-    >
-      <div
-        ref="editorParentEl"
-        class="json-editor"
+    <footer class="mask">
+      <YuumiDialog
+        v-model="isPreviewJSONData"
+        title="JSON Data"
+        @beforeEnter="onShowJSONData"
+        @afterLeave="onHideJSONData"
+      >
+        <div
+          ref="editorParentEl"
+          class="json-editor"
+        />
+      </YuumiDialog>
+
+      <FormPreview
+        v-if="isPreview"
+        @close="onPreviewClose"
+        @submit="onFormSubmit"
       />
-    </YuumiDialog>
-
-    <FormPreviewComponent
-      v-if="isPreview"
-      @close="onPreviewClose"
-      @submit="onFormSubmit"
-    />
+    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from "vue"
-import { useToolbar } from "./useToolbar"
-import { useSchema } from "./useSchema"
-import { useEventEffect } from "./useEventEffect"
-import WidgetsComponent from "./components/Widgets.vue"
-import FormRenderComponent from "./components/FormRender.vue"
-import FieldSettingComponent from "./components/FieldSetting"
-import FormSettingComponent from "./components/FormSetting"
-import EventEffectComponent from "./components/EventEffect"
-import FormPreviewComponent from "./components/preview/Index.vue"
 import { createAlert } from "yuumi-ui-vue"
+import { computed, nextTick, ref, watch } from "vue"
+import { useFields } from "./share/useFields"
+import { useForm } from "./share/useForm"
+import { useToolbar } from "./share/useToolbar"
+import { useEventEffect } from "./share/useEventEffect"
+import FormWidgets from "./components/Widgets.vue"
+import FormRender from "./components/Render.vue"
+import FieldSetting from "./components/FieldSetting"
+import FormSetting from "./components/FormSetting"
+import EffectSetting from "./components/EffectSetting"
+import FormPreview from "./components/preview/Index.vue"
 
-const { getSelectedFieldUID, getFields, getForm } = useSchema()
+const { getSelectedFieldUID, getFields } = useFields()
+
+const { getFormConfig } = useForm()
 const { getEventEffects } = useEventEffect()
 const { createEditor, destroyEditor } = useToolbar()
 
@@ -101,7 +104,7 @@ function onPreviewJSONData() {
 }
 function onShowJSONData() {
   const fields = getFields()
-  const form = getForm()
+  const form = getFormConfig()
   const effects = getEventEffects()
 
   nextTick(() => createEditor(editorParentEl.value, JSON.stringify(
@@ -134,11 +137,10 @@ watch(() => selectedID.value, (value, oldValue) => {
   width: 100%;
   height: 100%;
   display: flex;
-  min-width: 1340px;
+  min-width: 1360px;
   overflow: hidden;
-
-  .designer__left {
-    flex: 0 0 280px;
+  .designer__widgets {
+    flex: 0 0 300px;
   }
 
   .designer__main {
@@ -147,176 +149,53 @@ watch(() => selectedID.value, (value, oldValue) => {
     border-right: 1px solid var(--border-color);
   }
 
-  .designer__right {
+  .designer__setting {
     flex: 0 0 700px;
   }
+}
 
-  .designer__toolbar {
-    text-align: right;
+.designer__toolbar {
+  text-align: right;
+  flex: 0 0 auto;
+  padding: var(--space-md);
+  padding-bottom: 0;
+  font-size: 14px;
+  color: var(--color-primary);
+  cursor: pointer;
+
+  >span {
+    margin-left: var(--space-md);
+  }
+}
+
+.designer__setting :deep(>.yuumi-tabs) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .tabs__header {
+    padding-top: var(--space-sm);
     flex: 0 0 auto;
-    padding: var(--space-md);
-    padding-bottom: 0;
-    font-size: 14px;
-    color: var(--color-primary);
-    cursor: pointer;
+  }
 
-    >span {
-      margin-left: var(--space-md);
+  .tabs__panel {
+    flex: 1 1 1px;
+    overflow: hidden;
+    padding: 0 var(--space-md);
+    position: relative;
+
+    >div {
+      width: 100%;
+      height: 100%;
     }
   }
 }
 
-.setting {
-  :deep(.yuumi-tabs) {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-
-    .tabs__header {
-      padding-top: var(--space-sm);
-      flex: 0 0 auto;
-    }
-
-    .tabs__panel {
-      flex: 1 1 1px;
-      overflow: hidden;
-      padding: 0 var(--space-md);
-      position: relative;
-
-      >div {
-        width: 100%;
-        height: 100%;
-      }
-    }
-
-    .yuumi-icon {
-      cursor: pointer;
-
-      &:hover {
-        color: var(--color-primary)
-      }
-    }
-
-    .setting__title {
-      padding: var(--space-md) 0;
-      font-weight: bold;
-      display: flex;
-
-      >.title__name {
-        flex: 1 1 auto;
-      }
-    }
-
-
-    ul.options {
-      padding: 0;
-
-      li.option-item {
-        list-style: none;
-        display: flex;
-        align-items: center;
-
-        >span {
-          padding-right: var(--space-sm);
-        }
-
-        .drag-sort {
-          cursor: move;
-        }
-      }
-    }
-
-    .option__handler {
-      color: var(--color-primary);
-      font-size: 12px;
-
-      >span {
-        cursor: pointer;
-      }
-    }
-
-    .row._center {
-      margin-bottom: var(--space-md);
-      align-items: center;
-
-      .row__prefix {
-        flex-basis: 100px;
-      }
-
-      .row__content {
-        padding: 0 var(--space-md);
-        display: inline-flex;
-
-        .yuumi-select,
-        .yuumi-input {
-          width: 100%;
-        }
-      }
-    }
-  }
-
-  :deep(.effect-editor) {
-    padding: 0 16px;
-    border: 1px solid #ececec;
-    border-radius: 4px;
-
-    .conditions {
-      .condition-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: var(--space-sm);
-      }
-    }
-
-    .effect {
-      display: flex;
-      margin-bottom: var(--space-md);
-    }
-
-    .condition-item,
-    .effect {
-      [class^=yuumi] {
-        margin-right: var(--space-sm);
-
-      }
-      .yuumi-select {
-        flex: 0 0 auto;
-        text-align: center;
-      }
-
-      ._expand {
-        flex: 1 0 20%;
-      }
-    }
-
-    .effect__confirm {
-      text-align: right;
-      margin-bottom: var(--space-md);
-    }
-  }
-
-  :deep(.effects-list) {
-    padding: var(--space-md) 0;
-
-    .list-item {
-      display: flex;
-      align-items: center;
-      padding: var(--space-sm);
-      border-bottom: 1px solid var(--border-color);
-
-      :first-child {
-        flex: 1 1 auto;
-      }
-
-      :not(:last-child) {
-        margin-right: var(--space-sm);
-      }
-    }
-  }
-}
+@import "./styles/field-setting.scss";
+@import "./styles/effect-setting.scss";
 
 .json-editor {
   overflow: auto;
-  height: 480px;
+  max-height: 480px;
 }
 </style>

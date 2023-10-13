@@ -1,6 +1,6 @@
 import { computed, defineComponent, h, resolveComponent } from "vue"
 import { useI18n } from "vue-i18n"
-import { useSchema } from "@/pages/designer/useSchema"
+import { useForm } from "@/pages/designer/share/useForm"
 
 export default defineComponent({
   name: "LabelAlignSetting",
@@ -12,12 +12,12 @@ export default defineComponent({
       alignCenter: t("ALIGN.CENTER"),
       alignRight: t("ALIGN.RIGHT")
     }))
-    const { getForm, updateFormPropertyValue } = useSchema()
+    const { getFormConfig, updateFormConfigPropertyValue } = useForm()
     const propertyValue = computed(() => {
-      return getForm().labelAlign
+      return getFormConfig().labelAlign
     })
     function onChange(value: string) {
-      updateFormPropertyValue("labelAlign", value)
+      updateFormConfigPropertyValue("labelAlign", value)
     }
     return { staticText, propertyValue, onChange }
   },

@@ -1,0 +1,60 @@
+.designer__setting {
+  :deep(.effect-editor) {
+    padding: 0 16px;
+    border: 1px solid #ececec;
+    border-radius: 4px;
+
+    .conditions {
+      .condition-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: var(--space-sm);
+      }
+    }
+
+    .effect {
+      display: flex;
+      margin-bottom: var(--space-md);
+    }
+
+    .condition-item,
+    .effect {
+      [class^=yuumi] {
+        margin-right: var(--space-sm);
+
+      }
+      .yuumi-select {
+        flex: 0 0 auto;
+        text-align: center;
+      }
+
+      ._expand {
+        flex: 1 0 20%;
+      }
+    }
+
+    .effect__confirm {
+      text-align: right;
+      margin-bottom: var(--space-md);
+    }
+  }
+
+  :deep(.effects-list) {
+    padding: var(--space-md) 0;
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      padding: var(--space-sm);
+      border-bottom: 1px solid var(--border-color);
+
+      :first-child {
+        flex: 1 1 auto;
+      }
+
+      :not(:last-child) {
+        margin-right: var(--space-sm);
+      }
+    }
+  }
+}

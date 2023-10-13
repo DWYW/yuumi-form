@@ -1,6 +1,6 @@
 import { computed, defineComponent, h, resolveComponent } from "vue"
 import { useI18n } from "vue-i18n"
-import { useSchema } from "@/pages/designer/useSchema"
+import { useFields } from "@/pages/designer/share/useFields"
 
 export default defineComponent({
   name: "RequiredSetting",
@@ -10,7 +10,7 @@ export default defineComponent({
       fieldName: t("ATTR_NAME.REQUIRED"),
       faultPrompt: t("ATTR_NAME.FAULT_PROMPT"),
     }))
-    const { updateSelectedFieldPropertyValue, getSelectedField } = useSchema()
+    const { updateSelectedFieldPropertyValue, getSelectedField } = useFields()
 
     const isRequired = computed(() => {
       return getSelectedField()?.required || false

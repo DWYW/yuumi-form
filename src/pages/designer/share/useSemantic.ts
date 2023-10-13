@@ -1,13 +1,14 @@
 import { useI18n } from "vue-i18n"
-import { EventEffectConditionSchema, EventEffectSchema } from "@/pages/designer/useEventEffect"
+import { EventEffectConditionSchema, EventEffectSchema } from "./useEventEffect"
 import { useOptions } from "./useOpions"
-import type { FieldItem } from "@/pages/designer/share"
+import type { FieldItem } from "./type"
 
 interface UseSemanticOption {
-  getFieldWithUID: (uid: string) => FieldItem | undefined
+  getField: (uid: string) => FieldItem | undefined
+  getFieldRemoteOptions: (uid: string) => any[]
 }
 
-export function useSemantic({ getFieldWithUID }: UseSemanticOption) {
+export function useSemantic({ getField, getFieldRemoteOptions }: UseSemanticOption) {
   const { t } = useI18n()
   const { switchOptions, getMatchName, getPropertyName, getRequiredName, getDisabledName, getReadonlyName, getVisibleName } = useOptions()
 
@@ -18,9 +19,18 @@ export function useSemantic({ getFieldWithUID }: UseSemanticOption) {
     switch (property) {
       case "value":
         if (options.length > 0) {
-          const option = options.find((item) => item.value === res)
-          if (option) {
-            res = option.label
+          if (value instanceof Array) {
+            res = res.map((target: any) => {
+              const option = options.find((item) => item.value === target)
+              if (option) {
+                return option.label
+              }
+            })
+          } else {
+            const option = options.find((item) => item.value === res)
+            if (option) {
+              res = option.label
+            }
           }
         }
         break
@@ -42,31 +52,32 @@ export function useSemantic({ getFieldWithUID }: UseSemanticOption) {
   }
 
   function conditionSemantic(condition: EventEffectConditionSchema) {
-    const field = getFieldWithUID(condition.fieldId)
+    const field = getField(condition.fieldId)
     if (!field) return ""
 
+    const optionsData = field.optionsSource === "remote" ? getFieldRemoteOptions(field.uid) : field.options
     return t("MESSAGE.CONDITION_SEMANTIC", {
       fieldName: field.name,
       propertyName: getPropertyName(condition.property).toLowerCase(),
       matchName: getMatchName(condition.match).toLowerCase(),
-      propertyValue: propertyValueSemantic(condition.value, condition.property, field.type === "switch" ? switchOptions.value : field.options),
+      propertyValue: propertyValueSemantic(condition.value, condition.property, field.type === "switch" ? switchOptions.value : optionsData),
     })
   }
 
   function effectSemantic(effect: EventEffectSchema) {
-    const field = getFieldWithUID(effect.fieldId)
+    const field = getField(effect.fieldId)
     if (!field) return null
+    const optionsData = field.optionsSource === "remote" ? getFieldRemoteOptions(field.uid) : field.options
 
     const conditionText = effect.conditions.map((condition) => {
       return conditionSemantic(condition)
     }).filter((item) => !!item).join(` ${t("RELATION.AND")} `)
 
-
     return t("MESSAGE.EFFECT_SEMANTIC", {
       condition: `${t("RELATION.IF")} ${conditionText}`,
       fieldName: field.name,
       propertyName: getPropertyName(effect.property).toLowerCase(),
-      propertyValue: propertyValueSemantic(effect.value, effect.property, field.type === "switch" ? switchOptions.value : field.options)
+      propertyValue: propertyValueSemantic(effect.value, effect.property, field.type === "switch" ? switchOptions.value : optionsData)
     })
   }
 

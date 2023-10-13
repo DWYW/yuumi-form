@@ -56,14 +56,19 @@ export const ATTR_NAME = {
   FAULT_PROMPT: "必填提示",
   DISABLED: "禁用",
   READONLY: "只读",
-  CLEARABLE: "可清楚",
+  CLEARABLE: "可清除",
   TYPE: "类型",
   PLAIN: "朴素",
   ROUND: "圆角",
   SPLASH: "闪烁",
   LABEL_ALIGN: "标签对齐",
   FIELD: "字段",
-  PROPERTY: "属性"
+  PROPERTY: "属性",
+  REMOTE_URL: "远程地址",
+  METHOD: "调用方式",
+  CONTENT_TYPE: "数据类型",
+  REQUEST_HEADERS: "请求头",
+  RESPONSE: "响应体"
 }
 
 export const TITLE = {
@@ -73,7 +78,9 @@ export const TITLE = {
   FORM_SETTING: "表单设置",
   EVENT_EFFECT: "事件响应",
   CONDITION: "条件",
-  EFFECT: "响应"
+  EFFECT: "响应",
+  STATIC_DATA: "静态数据",
+  REMOTE_DATA: "远程数据",
 }
 
 export const ALIGN = {
@@ -91,8 +98,8 @@ export const MESSAGE = {
   CONDITION_ADD: "请添加条件",
   COMPLETE_CONDITION: "请完善条件",
   COMPLETE_EFFECT: "请完善事件响应",
-  CONDITION_SEMANTIC: "字段`{fieldName}`的属性`{propertyName}`{matchName}`{propertyValue}`",
-  EFFECT_SEMANTIC: "{condition},字段`{fieldName}`的属性`{propertyName}`为`{propertyValue}`；",
+  CONDITION_SEMANTIC: "字段 `{fieldName}` 的属性 `{propertyName}` {matchName} `{propertyValue}`",
+  EFFECT_SEMANTIC: "{condition},字段 `{fieldName}` 的属性 `{propertyName}` 为 `{propertyValue}`；",
   REQUIRED: "字段不能为空",
   FORM_EMPTY: "请从组件中选择一个组件，拖入到此位置。"
 }

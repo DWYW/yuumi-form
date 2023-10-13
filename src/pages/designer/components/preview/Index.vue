@@ -5,7 +5,9 @@
         <YuumiScrollbar>
           <FormComponent
             ref="form"
-            :form="schema"
+            :config="formConfig"
+            :fields="fields"
+            :effects="effects"
           />
         </YuumiScrollbar>
       </div>
@@ -27,19 +29,18 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { useSchema } from "@/pages/designer/useSchema"
-import { useEventEffect } from "@/pages/designer/useEventEffect"
-import FormComponent from "./Form.vue"
+import { useFields } from "@/pages/designer/share/useFields"
+import { useForm } from "@/pages/designer/share/useForm"
+import { useEventEffect } from "@/pages/designer/share/useEventEffect"
+import FormComponent from "./Form"
 
 const emit = defineEmits(["close", "submit"])
-const { getForm, getFields } = useSchema()
+const { getFields } = useFields()
+const { getFormConfig } = useForm()
 const { getEventEffects } = useEventEffect()
-const schema = computed(() => {
-  return Object.assign({
-    effects: getEventEffects(),
-    fields: getFields()
-  }, getForm())
-})
+const formConfig = computed(() => getFormConfig())
+const fields = computed(() => getFields())
+const effects = computed(() => getEventEffects())
 
 function onReturn() {
   emit("close")
@@ -78,6 +79,42 @@ function onSubmit() {
   text-align: center;
   :deep(.yuumi-button):not(:last-child) {
     margin-right: var(--space-md);
+  }
+}
+
+:deep(.form-row) {
+  margin: var(--space-md) 0;
+
+  .row__prefix {
+    padding-right: var(--space-md);
+    flex-basis: 120px;
+    line-height: 2;
+  }
+
+  .row__content {
+    position: relative;
+    display: inline-flex;
+
+    .yuumi-checkbox-group .yuumi-checkbox,
+    .yuumi-radio-group .yuumi-radio {
+      margin-right: var(--space-md);
+    }
+
+    .yuumi-input,
+    .yuumi-select,
+    .yuumi-time-picker,
+    .yuumi-date-picker {
+      width: 100%;
+    }
+  }
+
+  .form-row__msg {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    font-size: 12px;
+    color: var(--color-danger);
+    line-height: 1.5;
   }
 }
 </style>
