@@ -1,7 +1,7 @@
 import { computed, defineComponent, h, resolveComponent } from "vue"
 import { useI18n } from "vue-i18n"
-import { useSchema } from "@/pages/designer/useSchema"
-import type { OptionItem } from "@/pages/designer/share"
+import { useFields } from "@/pages/designer/share/useFields"
+import type { OptionItem } from "@/pages/designer/share/type"
 
 export default defineComponent({
   name: "ThemeSetting",
@@ -14,7 +14,7 @@ export default defineComponent({
       label: v,
       value: v
     })))
-    const { updateSelectedFieldPropertyValue, getSelectedField } = useSchema()
+    const { updateSelectedFieldPropertyValue, getSelectedField } = useFields()
     const propertyValue = computed(() => {
       return getSelectedField()?.props.theme
     })

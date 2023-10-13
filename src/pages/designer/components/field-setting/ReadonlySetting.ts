@@ -1,6 +1,6 @@
 import { computed, defineComponent, h, resolveComponent } from "vue"
 import { useI18n } from "vue-i18n"
-import { useSchema } from "@/pages/designer/useSchema"
+import { useFields } from "@/pages/designer/share/useFields"
 
 export default defineComponent({
   name: "ReadonlySetting",
@@ -9,7 +9,7 @@ export default defineComponent({
     const staticText = computed(() => ({
       fieldName: t("ATTR_NAME.READONLY")
     }))
-    const { updateSelectedFieldPropertyValue, getSelectedField } = useSchema()
+    const { updateSelectedFieldPropertyValue, getSelectedField } = useFields()
     const propertyValue = computed(() => {
       return getSelectedField()?.props.readonly || false
     })

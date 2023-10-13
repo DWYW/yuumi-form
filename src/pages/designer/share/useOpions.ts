@@ -1,10 +1,13 @@
-import { computed } from "vue"
+import { Ref, computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { useSchema } from "@/pages/designer/useSchema"
+import { useFields } from "./useFields"
+import type { FieldItem } from "./type"
+
+const fieldsRemoteOptions: Ref<{[K:string]: any[]}> = ref({})
 
 export function useOptions() {
   const { t } = useI18n()
-  const { getFields } = useSchema()
+  const { getFields } = useFields()
 
   const fieldOptions = computed(() => {
     return getFields().map((field) => ({ label: field.name, value: field.uid }))
@@ -90,6 +93,49 @@ export function useOptions() {
     return Number(value) ? t("OPTION.READONLY") : t("OPTION.READ_WRITE")
   }
 
+  const getFieldRemoteOptions = (uid: string) => {
+    return fieldsRemoteOptions.value[uid] || []
+  }
+
+  const deleteFieldRemoteOptions = (uid: string) => {
+    delete fieldsRemoteOptions.value[uid]
+  }
+
+  const updateFieldRemoteOptions = ({uid, dynamicOptions }: FieldItem): Promise<any> => {
+    return Promise.resolve(dynamicOptions).then((option: any) => {
+      if (!option.method || !option.url || !option.contentType) return
+      let headers = {
+        "Content-Type": option.contentType
+      }
+
+      if (option.headersSetter) {
+        try {
+          const setter = new Function("headers", option.headersSetter)
+          headers = setter(headers)
+        } catch(err) {
+          console.warn("headers setter parse failed.")
+        }
+      }
+
+      return fetch(option.url, {
+        method: option.method,
+        headers
+      }).then((response) => response.json())
+        .then((result) => {
+          if (option.responseParse) {
+            try {
+              const responseParse = new Function("response", option.responseParse)
+              result = responseParse(result)
+            } catch(err) {
+              console.warn("response parse failed.")
+            }
+          }
+
+          fieldsRemoteOptions.value[uid] = result
+        })
+    })
+  }
+
   return {
     fieldOptions,
     propertyOptions,
@@ -105,6 +151,9 @@ export function useOptions() {
     getRequiredName,
     getDisabledName,
     getVisibleName,
-    getReadonlyName
+    getReadonlyName,
+    getFieldRemoteOptions,
+    deleteFieldRemoteOptions,
+    updateFieldRemoteOptions
   }
 }

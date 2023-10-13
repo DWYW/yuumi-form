@@ -3,12 +3,12 @@ import { useI18n } from "vue-i18n"
 import { createMessage } from "yuumi-ui-vue"
 import { deepCopy } from "@/common/helper"
 import { format, string2date } from "@/common/moment"
-import { useSchema } from "../useSchema"
-import { EventEffectSchema, EventEffectConditionSchema, useEventEffect, Value } from "../useEventEffect"
-import { useOptions } from "./event-effect/useOpions"
-import { useSemantic } from "./event-effect/useSemantic"
+import { useFields } from "../share/useFields"
+import { EventEffectSchema, EventEffectConditionSchema, useEventEffect, Value } from "../share/useEventEffect"
+import { useOptions } from "../share/useOpions"
+import { useSemantic } from "../share/useSemantic"
 import type { Ref, VNode } from "vue"
-import type { FieldItemProps } from "../share"
+import type { FieldItemProps } from "../share/type"
 
 interface RenderValueComponentOption {
   multiple?: boolean
@@ -31,9 +31,9 @@ export default defineComponent({
       completeCondition: t("MESSAGE.COMPLETE_CONDITION"),
       completeEffect: t("MESSAGE.COMPLETE_EFFECT")
     }))
-    const { getFields, getFieldWithUID } = useSchema()
-    const { fieldOptions, propertyOptions, operatorOptions, switchOptions, requiredOptions, disabledOptions, readonlyOptions, visibleOptions } = useOptions()
-    const { effectSemantic } = useSemantic({ getFieldWithUID })
+    const { getFields, getField } = useFields()
+    const { fieldOptions, propertyOptions, operatorOptions, switchOptions, requiredOptions, disabledOptions, readonlyOptions, visibleOptions, getFieldRemoteOptions } = useOptions()
+    const { effectSemantic } = useSemantic({ getField, getFieldRemoteOptions })
     const { createEventEffect, getEventEffects, addEventEffect, updateEventEffect, deleteEventEffect } = useEventEffect()
     const effects = computed(() => getEventEffects())
     function effectUpdateOrAdd(data: EventEffectSchema) {
@@ -66,7 +66,7 @@ export default defineComponent({
       readonlyOptions,
       visibleOptions,
       getFields,
-      getFieldWithUID,
+      getField,
       effects,
       effectUpdateOrAdd,
       deleteEventEffect,
@@ -74,7 +74,8 @@ export default defineComponent({
       effect,
       addCondition,
       deleteCondition,
-      resetEffect
+      resetEffect,
+      getFieldRemoteOptions
     }
   },
   render() {
@@ -165,12 +166,13 @@ export default defineComponent({
         const field = fields.find((item) => item.uid === data.fieldId)
         if (!field) return h(resolveComponent("YuumiSelect"), { class: "_expand" })
 
+        const optionsData = field.optionsSource === "remote" ? this.getFieldRemoteOptions(field.uid) : field.options
         switch (data.property) {
           case "value":
             const componentRender: {[x:string]: () => VNode} = {
-              select: () => renderOptionValueComponent(data.value, updateValue)(field.options, field.props.multiple && option?.multiple),
-              radio: () => renderOptionValueComponent(data.value, updateValue)(field.options),
-              checkbox: () => renderOptionValueComponent(data.value, updateValue)(field.options, option?.multiple),
+              select: () => renderOptionValueComponent(data.value, updateValue)(optionsData, field.props.multiple && option?.multiple),
+              radio: () => renderOptionValueComponent(data.value, updateValue)(optionsData),
+              checkbox: () => renderOptionValueComponent(data.value, updateValue)(optionsData, option?.multiple),
               switch: () => renderBooleanValueComponent(data.value, updateValue)(switchOptions),
               timepicker: () => renderTimePicerValueComponent(data.value, updateValue)(field.props, option),
               datepicker: () => renderDatePicerValueComponent(data.value, updateValue)(field.props, option),

@@ -1,7 +1,7 @@
 {
   "name": "yuumi-form",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +18,7 @@
     "vue": "^3.2.47",
     "vue-i18n": "^9.3.0",
     "vue-router": "^4.2.2",
-    "yuumi-ui-vue": "^1.1.13"
+    "yuumi-ui-vue": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.3.0",

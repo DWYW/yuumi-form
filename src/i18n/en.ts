@@ -63,7 +63,12 @@ export const ATTR_NAME = {
   SPLASH: "Splash",
   LABEL_ALIGN: "Label Align",
   FIELD: "Field",
-  PROPERTY: "Property"
+  PROPERTY: "Property",
+  REMOTE_URL: "远程地址",
+  METHOD: "调用方式",
+  CONTENT_TYPE: "数据类型",
+  REQUEST_HEADERS: "请求头",
+  RESPONSE: "响应体"
 }
 
 export const TITLE = {
@@ -73,7 +78,9 @@ export const TITLE = {
   FORM_SETTING: "Form Setting",
   EVENT_EFFECT: "Event Effect",
   CONDITION: "Condition",
-  EFFECT: "Effect"
+  EFFECT: "Effect",
+  STATIC_DATA: "静态数据",
+  REMOTE_DATA: "远程数据",
 }
 
 export const ALIGN = {

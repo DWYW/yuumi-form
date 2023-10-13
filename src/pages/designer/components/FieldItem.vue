@@ -1,7 +1,7 @@
 <template>
   <div
     :class="['form-row', {
-      '_required': fieldSchema.required
+      '_required': field.required
     }]"
   >
     <component :is="RowChildren" />
@@ -10,25 +10,35 @@
 
 <script setup lang="ts">
 import { computed, h, ref, resolveComponent, watch } from "vue"
-import { useSchema } from "../useSchema"
+import { useForm } from "../share/useForm"
+import { useOptions } from "../share/useOpions"
 import type { ComputedRef, ConcreteComponent, PropType, VNode } from "vue"
-import type { FieldItem } from "../share"
+import type { FieldItem } from "../share/type"
 
-const props = defineProps({
-  fieldSchema: { type: Object as PropType<FieldItem>, required: true }
+const { field } = defineProps({
+  field: { type: Object as PropType<FieldItem>, required: true }
 })
 
-const { getForm } = useSchema()
-const formConfig = computed(() => getForm())
-const modelValue = ref(props.fieldSchema.defaultValue)
+const { getFormConfig } = useForm()
+const formConfig = computed(() => getFormConfig())
+const modelValue = ref(field.defaultValue)
+
+const { getFieldRemoteOptions, updateFieldRemoteOptions, deleteFieldRemoteOptions } = useOptions()
+const optionsData = computed(() => field.optionsSource === "remote" ? getFieldRemoteOptions(field.uid) : field.options)
+
+watch(() => field.dynamicOptions, (value) => {
+  if (field.optionsSource !== "remote" || !value) return
+  deleteFieldRemoteOptions(field.uid)
+  updateFieldRemoteOptions(field)
+}, { deep: true, immediate: true })
 
 /** ----------- 根据type生成VNodes ----------- */
 function RowChildren(): VNode {
-  return generateWithType(props.fieldSchema.type)
+  return generateWithType(field.type)
 }
 
 const componentProps: ComputedRef<{ [x: string]: any }> = computed(() => {
-  const _props = props.fieldSchema.props
+  const _props = field.props
   const _modelValue = {
     modelValue: modelValue.value,
     "onUpdate:modelValue": (value: any) => {
@@ -38,12 +48,12 @@ const componentProps: ComputedRef<{ [x: string]: any }> = computed(() => {
 
   const generateMap: { [x: string]: () => object } = {
     select: () => (Object.assign(_modelValue, _props, {
-      options: props.fieldSchema.options
+      options: optionsData.value
     })),
     button: () => _props
   }
-  return generateMap[props.fieldSchema.type] ?
-    generateMap[props.fieldSchema.type]() :
+  return generateMap[field.type] ?
+    generateMap[field.type]() :
     Object.assign(_modelValue, _props)
 })
 
@@ -68,14 +78,14 @@ const typeComponent: { [x: string]: ConcreteComponent | string } = {
 const getLabelClassName = () => ["row__prefix", "text--" + formConfig.value.labelAlign]
 
 function generateButton() {
-  return [h(typeComponent["button"], componentProps.value, () => props.fieldSchema.name)]
+  return [h(typeComponent["button"], componentProps.value, () => field.name)]
 }
 
 function generateRadio() {
   return [
-    h("div", { class: getLabelClassName() }, [props.fieldSchema.name]),
+    h("div", { class: getLabelClassName() }, [field.name]),
     h("div", { class: "row__content" }, [
-      h(resolveComponent("YuumiRadioGroup"), componentProps.value, () => props.fieldSchema.options.map((item) => {
+      h(resolveComponent("YuumiRadioGroup"), componentProps.value, () => optionsData.value.map((item) => {
         return h(resolveComponent("YuumiRadio"), { unique: item.value }, () => item.label)
       }))
     ])
@@ -84,9 +94,9 @@ function generateRadio() {
 
 function generateCheckbox() {
   return [
-    h("div", { class: getLabelClassName() }, [props.fieldSchema.name]),
+    h("div", { class: getLabelClassName() }, [field.name]),
     h("div", { class: "row__content" }, [
-      h(resolveComponent("YuumiCheckboxGroup"), componentProps.value, () => props.fieldSchema.options.map((item) => {
+      h(resolveComponent("YuumiCheckboxGroup"), componentProps.value, () => optionsData.value.map((item) => {
         return h(resolveComponent("YuumiCheckbox"), { unique: item.value }, () => item.label)
       }))
     ])
@@ -99,9 +109,9 @@ function generateWithType(type: string) {
     radio: generateRadio,
     checkbox: generateCheckbox,
     default: (type: string) => [
-      h("div", { class: getLabelClassName() }, [props.fieldSchema.name]),
+      h("div", { class: getLabelClassName() }, [field.name]),
       h("div", { class: "row__content" }, [
-        h(typeComponent[type], componentProps.value, () => props.fieldSchema.name)
+        h(typeComponent[type], componentProps.value, () => field.name)
       ]),
     ]
   }
